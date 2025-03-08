@@ -4,17 +4,14 @@ var router = express.Router();
 let productSchema = require('../models/products')
 let BuildQueies = require('../Utils/BuildQuery')
 
-// GET all products - Chỉ lấy các product chưa bị delete
 router.get('/', async function(req, res, next) {
   let queries = req.query;
-  // Thêm điều kiện isDeleted: false vào query
   let products = await productSchema
     .find({ ...BuildQueies.QueryProduct(queries), isDeleted: false })
     .populate("categoryID");
   res.send(products);
 });
 
-// GET product by ID - Kiểm tra isDeleted
 router.get('/:id', async function(req, res, next) {
   try {
     let product = await productSchema.findOne({ 
@@ -39,7 +36,6 @@ router.get('/:id', async function(req, res, next) {
   }
 });
 
-// Các route khác (POST, PUT, DELETE) giữ nguyên
 router.post('/', async function(req, res, next) {
   let body = req.body;
   console.log(body);

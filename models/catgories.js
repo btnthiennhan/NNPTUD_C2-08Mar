@@ -10,7 +10,7 @@ let categorySchema = mongoose.Schema({
         type:String,
         default:""
     },
-    isDeleted:{           // Thêm trường mới
+    isDeleted:{           
         type:Boolean,
         default:false
     }

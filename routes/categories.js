@@ -3,14 +3,12 @@ var express = require('express');
 var router = express.Router();
 let categorySchema = require('../models/catgories')
 
-// GET all categories - Chỉ lấy các category chưa bị delete
 router.get('/', async function(req, res, next) {
   let queries = req.query;
   let categories = await categorySchema.find({ isDeleted: false });
   res.send(categories);
 });
 
-// GET category by id - Kiểm tra isDeleted
 router.get('/:id', async function(req, res, next) {
   try {
     let category = await categorySchema.findOne({ 
@@ -34,8 +32,6 @@ router.get('/:id', async function(req, res, next) {
     })
   }
 });
-
-// Các route khác (POST, PUT, DELETE) giữ nguyên
 router.post('/', async function(req, res, next) {
   try {
     let body = req.body;
