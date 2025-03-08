@@ -1,35 +1,31 @@
 const { fail } = require('assert');
 var express = require('express');
 var router = express.Router();
-let productSchema = require('../models/products')
-let BuildQueies = require('../Utils/BuildQuery')
+let categorySchema = require('../models/catgories')
 
-// GET all products - Chỉ lấy các product chưa bị delete
+// GET all categories - Chỉ lấy các category chưa bị delete
 router.get('/', async function(req, res, next) {
   let queries = req.query;
-  // Thêm điều kiện isDeleted: false vào query
-  let products = await productSchema
-    .find({ ...BuildQueies.QueryProduct(queries), isDeleted: false })
-    .populate("categoryID");
-  res.send(products);
+  let categories = await categorySchema.find({ isDeleted: false });
+  res.send(categories);
 });
 
-// GET product by ID - Kiểm tra isDeleted
+// GET category by id - Kiểm tra isDeleted
 router.get('/:id', async function(req, res, next) {
   try {
-    let product = await productSchema.findOne({ 
+    let category = await categorySchema.findOne({ 
       _id: req.params.id,
       isDeleted: false 
     });
-    if (!product) {
+    if (!category) {
       return res.status(404).send({
         success: false,
-        message: "Product not found or has been deleted"
+        message: "Category not found or has been deleted"
       });
     }
     res.status(200).send({
       success: true,
-      data: product
+      data: category
     });
   } catch (error) {
     res.status(404).send({
@@ -41,29 +37,45 @@ router.get('/:id', async function(req, res, next) {
 
 // Các route khác (POST, PUT, DELETE) giữ nguyên
 router.post('/', async function(req, res, next) {
-  let body = req.body;
-  console.log(body);
-  let newProduct = new productSchema({
-    productName: body.productName,
-    price: body.price,
-    quantity: body.quantity,
-    categoryID: body.category
-  })
-  await newProduct.save()
-  res.send(newProduct);
+  try {
+    let body = req.body;
+    let newCategory = new categorySchema({
+      categoryName: body.categoryName,
+      description: body.description
+    });
+    await newCategory.save();
+    res.status(201).send({
+      success: true,
+      data: newCategory
+    });
+  } catch (error) {
+    res.status(400).send({
+      success: false,
+      message: error.message
+    });
+  }
 });
 
 router.put('/:id', async function(req, res, next) {
   try {
     let body = req.body;
-    let product = await productSchema.findByIdAndUpdate(req.params.id,
-      body, {new: true});
+    let category = await categorySchema.findByIdAndUpdate(
+      req.params.id,
+      body,
+      { new: true }
+    );
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found"
+      });
+    }
     res.status(200).send({
       success: true,
-      data: product
+      data: category
     });
   } catch (error) {
-    res.status(404).send({
+    res.status(400).send({
       success: false,
       message: error.message
     })
@@ -72,20 +84,20 @@ router.put('/:id', async function(req, res, next) {
 
 router.delete('/:id', async function(req, res, next) {
   try {
-    let product = await productSchema.findByIdAndUpdate(
+    let category = await categorySchema.findByIdAndUpdate(
       req.params.id,
       { isDeleted: true },
       { new: true }
     );
-    if (!product) {
+    if (!category) {
       return res.status(404).send({
         success: false,
-        message: "Product not found"
+        message: "Category not found"
       });
     }
     res.status(200).send({
       success: true,
-      data: product
+      data: category
     });
   } catch (error) {
     res.status(400).send({
